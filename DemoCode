@@ -50,7 +50,7 @@ void setup()
       continue;
 
     //while(!lora.setOTAAJoin(JOIN));
-    //delay(10000);
+    delay(10000);
 }
  
 void loop()
@@ -67,8 +67,9 @@ void loop()
     analogWrite(LED,brightness);
 
      bool result = false;
-    
-    result = lora.transferPacket("Hello World!", 10);
+    memset(buffer, 0, 256);
+    sprintf(buffer, "%f", degrees);
+    result = lora.transferPacket(buffer, 10);
 
      if(result)
     {
