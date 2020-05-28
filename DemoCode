@@ -1,4 +1,10 @@
 /*macro definitions of Rotary angle sensor and LED pin*/
+#include <LoRaWan.h>
+
+
+unsigned char data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA,};
+char buffer[256];
+
  
 #define ROTARY_ANGLE_SENSOR A0
 #define LED 3  //the Grove - LED is connected to PWM pin D3 of Arduino
@@ -9,9 +15,42 @@
  
 void setup()
 {
+    SerialUSB.begin(115200);
+    while(!SerialUSB);
+    
+    lora.init();
+    
+    memset(buffer, 0, 256);
+    lora.getVersion(buffer, 256, 1);
+    SerialUSB.print(buffer); 
+    
+    memset(buffer, 0, 256);
+    lora.getId(buffer, 256, 1);
+    SerialUSB.print(buffer);
+
+    lora.setId(NULL, NULL, "70B3D57ED002FAA5");      // set App key, from TTN device overview
+
+    // ???
+    lora.setKey("039CBB775BFF1AC59FFFBCA9BC5DEC52",     // NetSKEY
+                "9D3F0252CA11CC6920F36DE215748093",     // AppSKEY
+                "A16882BFC113FC80CAA6B5919536551C");    // AppKey
+
+    lora.setDeciveMode(LWOTAA);
+    lora.setDataRate(DR0, AU915);
+
+    
+      
     Serial.begin(9600);
     pinMode(ROTARY_ANGLE_SENSOR, INPUT);
     pinMode(LED,OUTPUT);   
+
+    SerialLoRa.println("AT+CH=NUM,8-15,65");
+    delay(200);
+    while(!lora.setOTAAJoin(JOIN, 15))
+      continue;
+
+    //while(!lora.setOTAAJoin(JOIN));
+    //delay(10000);
 }
  
 void loop()
@@ -26,5 +65,16 @@ void loop()
     int brightness;
     brightness = map(degrees, 0, FULL_ANGLE, 0, 255);
     analogWrite(LED,brightness);
+
+     bool result = false;
+    
+    result = lora.transferPacket("Hello World!", 10);
+
+     if(result)
+    {
+      Serial.println("recieved transfer packet result");
+    
+    }
+    
     delay(500);
 }
