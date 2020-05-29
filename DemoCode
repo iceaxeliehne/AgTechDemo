@@ -66,9 +66,13 @@ void loop()
     brightness = map(degrees, 0, FULL_ANGLE, 0, 255);
     analogWrite(LED,brightness);
 
+    int light_value = analogRead(A1);
+    Serial.println("The value from the light sensor is:");
+    Serial.println(light_value);
+    
      bool result = false;
     memset(buffer, 0, 256);
-    sprintf(buffer, "%f", degrees);
+    sprintf(buffer, "%f, %d", degrees, light_value);
     result = lora.transferPacket(buffer, 10);
 
      if(result)
